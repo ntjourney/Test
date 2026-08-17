@@ -1,0 +1,1 @@
+(()=>{const s=document.createElement('style');s.textContent='.demo-modal[hidden]{display:none!important}.brand img{display:block;width:150px;height:auto;max-height:42px}';document.head.appendChild(s);const brand=document.querySelector('.brand');if(brand)brand.innerHTML='<img src="azad-grill-logo.svg" alt="AZAD GRILL">';})();
