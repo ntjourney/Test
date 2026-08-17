@@ -1,0 +1,1 @@
+Scope: local order flow, success modal, validation, duplicate-submit guard, and menu accordion. No external transmission or payment.
