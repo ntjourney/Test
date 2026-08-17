@@ -1,1 +1,1 @@
-AZAD GRILL menu and CTA behavior
+let c='Döner';function r(){tabs.innerHTML=[...new Set(AZAD.menu.map(x=>x.category))].map(x=>`<button onclick="c='${x}';r()">${x}</button>`).join('');items.innerHTML=AZAD.menu.filter(x=>x.category==c).map(x=>`<div class="card"><b>${x.name}</b><br>${x.description} — ${x.price}</div>`).join('');contact.innerHTML='Telefon: '+AZAD.contact.phone+'<br>Adresse: '+AZAD.contact.address;hours.innerHTML=AZAD.hours.map(x=>'<p>'+x+'</p>').join('')}r();[o,o2].forEach(x=>x.href=AZAD.contact.orderUrl);
