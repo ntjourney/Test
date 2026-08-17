@@ -1,4 +1,4 @@
-const state = { cart: [], openCategory: null, submitting: false };
+const state = { cart: [], openCategory: 'Döner', submitting: false };
 const euro = value => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value);
 const $ = id => document.getElementById(id);
 
@@ -6,32 +6,48 @@ $('address').textContent = AZAD.contact.address;
 $('footer-address').textContent = AZAD.contact.address;
 $('notice').textContent = AZAD.notice;
 
-const categories = [...new Set(AZAD.menu.map(item => item.category))];
+const categories = Array.from(new Set(AZAD.menu.map(item => item.category)));
 const totalValue = () => state.cart.reduce((sum, entry) => sum + AZAD.menu[entry.index].price * entry.qty, 0);
 
+function menuProducts(category) {
+  return AZAD.menu.map((item, index) => ({ item, index })).filter(entry => entry.item.category === category);
+}
+
 function renderMenu() {
-  $('categories').innerHTML = categories.map(category => {
-    const expanded = state.openCategory === category;
-    const products = AZAD.menu
-      .map((item, index) => ({ item, index }))
-      .filter(({ item }) => item.category === category);
-    return `<section class="accordion-item ${expanded ? 'is-open' : ''}">
-      <button class="accordion-trigger" type="button" data-category="${category}" aria-expanded="${expanded}">
+  const container = $('categories');
+  if (!container) return;
+  if (!Array.isArray(AZAD.menu) || !AZAD.menu.length || !categories.length) {
+    container.innerHTML = '<p class="menu-fallback">Die Speisekarte konnte nicht geladen werden. Bitte lade die Seite erneut.</p>';
+    return;
+  }
+  container.innerHTML = categories.map(category => {
+    const isOpen = state.openCategory === category;
+    const products = menuProducts(category);
+    return `<section class="accordion-item ${isOpen ? 'is-open' : ''}">
+      <button class="accordion-trigger" type="button" data-category="${category}" aria-expanded="${isOpen}">
         <span>${category}</span><span class="accordion-icon" aria-hidden="true">+</span>
       </button>
-      <div class="accordion-content" ${expanded ? '' : 'hidden'}>
-        <div class="menu">${products.map(({ item, index }) => `<article class="item"><div><h3>${item.name}</h3><p>${item.description}</p><strong>${euro(item.price)}</strong></div><button class="add" type="button" data-index="${index}" aria-label="${item.name} in den Warenkorb">+</button></article>`).join('')}</div>
+      <div class="accordion-content" aria-hidden="${!isOpen}">
+        <div class="accordion-content__inner"><div class="menu">${products.map(({ item, index }) => `<article class="item"><div><h3>${item.name}</h3><p>${item.description}</p><strong>${euro(item.price)}</strong></div><button class="add" type="button" data-index="${index}" aria-label="${item.name} in den Warenkorb">+</button></article>`).join('')}</div></div>
       </div>
     </section>`;
   }).join('');
 
-  $('categories').querySelectorAll('.accordion-trigger').forEach(button => {
+  container.querySelectorAll('.accordion-trigger').forEach(button => {
     button.addEventListener('click', () => {
-      state.openCategory = state.openCategory === button.dataset.category ? null : button.dataset.category;
-      renderMenu();
+      const nextCategory = state.openCategory === button.dataset.category ? null : button.dataset.category;
+      state.openCategory = nextCategory;
+      container.querySelectorAll('.accordion-item').forEach(item => {
+        const trigger = item.querySelector('.accordion-trigger');
+        const content = item.querySelector('.accordion-content');
+        const isOpen = trigger.dataset.category === nextCategory;
+        item.classList.toggle('is-open', isOpen);
+        trigger.setAttribute('aria-expanded', String(isOpen));
+        content.setAttribute('aria-hidden', String(!isOpen));
+      });
     });
   });
-  $('categories').querySelectorAll('.add').forEach(button => button.addEventListener('click', () => add(Number(button.dataset.index))));
+  container.querySelectorAll('.add').forEach(button => button.addEventListener('click', () => add(Number(button.dataset.index))));
 }
 
 function add(index) {
@@ -104,7 +120,7 @@ function openModal(order) {
   modal.hidden = false;
   document.body.classList.add('modal-open');
   requestAnimationFrame(() => modal.classList.add('is-visible'));
-  $('.success-card').focus();
+  document.querySelector('.success-card').focus();
 }
 
 function closeModal() {
